@@ -1,0 +1,88 @@
+import { NextResponse } from 'next/server';
+import { requestEvaluation } from '@/lib/aiEvaluator';
+import { createSupabaseRouteHandlerClient } from '@/lib/supabase/api';
+
+export async function POST(request: Request) {
+  const supabase = createSupabaseRouteHandlerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => null);
+
+  if (!body) {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+  }
+
+  const { title, description, code, language } = body;
+
+  if (!title || !description || !code) {
+    return NextResponse.json({ error: 'Title, description, and code are required.' }, { status: 400 });
+  }
+
+  const normalizedLanguage = typeof language === 'string' && language.trim().length > 0 ? language.trim().toLowerCase() : 'unspecified';
+
+  const basePayload = {
+    user_id: user.id,
+    title,
+    description,
+    code,
+    language: normalizedLanguage,
+    status: 'pending',
+  };
+
+  let data;
+  let error;
+
+  const insert = await supabase
+    .from('tasks')
+    .insert(basePayload)
+    .select('*')
+    .single();
+
+  data = insert.data;
+  error = insert.error;
+
+  // Fallback: if the Supabase project hasn't been migrated yet and `language`
+  // column is missing, retry without the column so users can still proceed.
+  if (error && (error as any)?.code === '42703') {
+    const legacyPayload = { ...basePayload } as Record<string, unknown>;
+    delete legacyPayload.language;
+
+    const legacyInsert = await supabase
+      .from('tasks')
+      .insert(legacyPayload)
+      .select('*')
+      .single();
+
+    data = legacyInsert.data;
+    error = legacyInsert.error;
+  }
+
+  if (error || !data) {
+    console.error('Supabase insert error:', error, 'inserted data:', data);
+    const devDetails = {
+      message: error?.message ?? 'Failed to create task',
+      details: (error as any)?.details ?? null,
+      hint: (error as any)?.hint ?? null,
+      code: (error as any)?.code ?? null,
+    };
+
+    return NextResponse.json({ error: devDetails.message, dev: devDetails }, { status: 500 });
+  }
+
+  requestEvaluation({
+    taskId: data.id,
+    userId: user.id,
+    title,
+    description,
+    code,
+    language: normalizedLanguage,
+  });
+
+  return NextResponse.json({ task: data });
+}

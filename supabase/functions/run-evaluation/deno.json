@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.47.6"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "dom", "deno.unstable"]
+  }
+}
