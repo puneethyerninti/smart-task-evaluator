@@ -5,14 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function SignupPage() {
   const router = useRouter();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const supabase = useMemo(() => {
-    if (!supabaseUrl || !supabaseAnon) return null;
-    return createSupabaseBrowserClient();
-  }, [supabaseUrl, supabaseAnon]);
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -42,6 +40,8 @@ export default function SignupPage() {
     router.refresh();
   };
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseAnon) {
     return (
       <main className="min-h-screen flex items-center justify-center p-8 text-center">
