@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { getSupabaseKeys } from '@/lib/env';
 
 const priceCents = Number(process.env.NEXT_PUBLIC_REPORT_PRICE_CENTS ?? '1500');
 const priceDisplay = priceCents > 0 ? `$${(priceCents / 100).toFixed(2)}` : '—';
 
 export default async function BillingPage() {
-  const { url: supabaseUrl, anon: supabaseAnon } = getSupabaseKeys();
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // If env vars are missing, render a configuration helper instead of crashing build.
   if (!supabaseUrl || !supabaseAnon) {

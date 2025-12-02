@@ -1,9 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { getSupabaseKeys } from './lib/env'
 
 export async function middleware(request: NextRequest) {
-  const { url: supabaseUrl, anon: supabaseAnon } = getSupabaseKeys()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // If env vars are missing in Vercel, skip Supabase session sync to avoid middleware crashes.
   if (!supabaseUrl || !supabaseAnon) {

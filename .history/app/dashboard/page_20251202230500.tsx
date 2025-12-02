@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getSupabaseKeys } from "@/lib/env";
 
 // NavBar rendered in layout
 
@@ -9,7 +8,8 @@ type ReportSummary = { id: string; task_id: string | null; score: number | null;
 type TaskRow = { id: string; title: string; status: string | null; created_at: string | null };
 
 export default async function DashboardPage() {
-  const { url: supabaseUrl, anon: supabaseAnon } = getSupabaseKeys();
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseAnon) {
     return (
       <main className="min-h-screen flex items-center justify-center p-10 text-center bg-slate-950 text-white">
