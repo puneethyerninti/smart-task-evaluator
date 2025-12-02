@@ -41,8 +41,7 @@ export default async function BillingPage() {
     .select('id, unlocked, short_feedback, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
-  type ReportRow = { id: string; unlocked: boolean; short_feedback: string | null; created_at: string };
-  const lockedReports: ReportRow[] = ((reports ?? []) as ReportRow[]).filter((r: ReportRow) => !r.unlocked);
+  const lockedReports = (reports ?? []).filter(r => !r.unlocked);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-950">

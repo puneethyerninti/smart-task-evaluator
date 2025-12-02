@@ -43,7 +43,7 @@ export default async function DashboardPage() {
 
   const totalTasks = (tasks as TaskRow[] | null)?.length ?? 0;
   const pendingTasks = ((tasks ?? []) as TaskRow[]).filter((task: TaskRow) => (task.status ?? "pending") !== "done").length;
-  const unlockedReports = ((evaluations ?? []) as ReportSummary[]).filter((report: ReportSummary) => report.unlocked).length;
+  const unlockedReports = (evaluations ?? []).filter((report) => report.unlocked).length;
   const latestScore = (evaluations ?? [])[0]?.score ?? "—";
   const friendlyName =
     (user?.user_metadata?.full_name as string | undefined) ?? user?.email?.split("@")[0] ?? "there";
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="mt-6 space-y-3">
-                {((tasks ?? []) as TaskRow[]).slice(0, 6).map((task: TaskRow) => {
+                {(tasks ?? []).slice(0, 6).map((task) => {
                   const status = (task.status ?? "pending").toLowerCase();
                   const isDone = status === "done";
                   const badge = isDone ? { label: "Completed", style: "bg-emerald-50 text-emerald-700" } : { label: "In review", style: "bg-amber-50 text-amber-700" };

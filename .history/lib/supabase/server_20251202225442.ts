@@ -1,0 +1,28 @@
+import { cache } from "react";
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+
+// Resolve cookies() once per request to stay compatible with the async Next.js 16 API.
+export const createSupabaseServerClient = cache(async () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) {
+    throw new Error(
+      "Supabase env vars missing (NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY). Configure these in Vercel before accessing server-side Supabase features."
+    );
+  }
+
+  const cookieStore = await Promise.resolve(cookies());
+  return createServerClient(url, anon, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) =>
+          cookieStore.set(name, value, options)
+        );
+      },
+    },
+  });
+});
